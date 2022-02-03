@@ -84,8 +84,8 @@ where e := MakeEdge(i,j) {
 
    -- pick the bend angle for the arc relative to the edge
    scalar e.alpha = ?
-   scalar alpha0 = toRadians( 30. )
-   scalar alpha1 = toRadians( 60. )
+   scalar alpha0 = toRadians( 10. )
+   scalar alpha1 = toRadians( 30. )
    ensure inRange( e.alpha, alpha0, alpha1 )
 
    shape e.segment = Line {
