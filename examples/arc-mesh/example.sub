@@ -12,7 +12,10 @@ Edge lj := MakeEdge( l, j )
 Edge jm := MakeEdge( j, m )
 Edge mk := MakeEdge( m, k )
 
-Corner c := MakeCorner( i, j, k )
+Angle theta := EuclideanCorner( i, j, k )
+Angle alpha := BendAngle( j, m )
 
 AutoLabel All
+Label theta "θ"
+Label alpha "α"
 

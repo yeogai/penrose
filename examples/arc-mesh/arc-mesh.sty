@@ -8,10 +8,12 @@ canvas {
 Colors {
    color black = rgba(0,0,0,1)
    color white = rgba(1,1,1,1)
+   color lightGray = rgba(.8,.8,.8,1.)
 }
 
--- Define a global box around the canvas
+-- Global shapes and constants
 Global {
+   -- draw a box around the canvas
    shape box = Rectangle {
       center: (0,0)
       width: canvas.width
@@ -20,6 +22,11 @@ Global {
       fillColor: none()
       strokeWidth: 1
    }
+
+   string labelFont = "Linux Libertine O"
+   string labelStyle = "italic"
+   string labelSize = "9px"
+   scalar labelSizeNum = 9
 }
 
 -- Draw each vertex as a little dot
@@ -45,9 +52,9 @@ where v has label {
    shape v.labelText = Text {
       string: v.label
       fillColor: Colors.black
-      fontFamily: "Linux Libertine O"
-      fontSize: "9px"
-      fontStyle: "italic"
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
    }
 
    shape v.strokeText = Text {
@@ -56,9 +63,9 @@ where v has label {
       fillColor: Colors.white
       strokeColor: Colors.white
       strokeWidth: 2
-      fontFamily: "Linux Libertine O"
-      fontSize: "9px"
-      fontStyle: "italic"
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
       ensureOnCanvas: false
    }
    layer v.labelText above v.strokeText
@@ -75,34 +82,49 @@ where e := MakeEdge(i,j) {
    vec2 a = i.center
    vec2 b = j.center
 
+   -- pick the bend angle for the arc relative to the edge
    scalar e.alpha = ?
-   scalar alpha0 = toRadians( 10. )
-   scalar alpha1 = toRadians( 30. )
+   scalar alpha0 = toRadians( 30. )
+   scalar alpha1 = toRadians( 60. )
    ensure inRange( e.alpha, alpha0, alpha1 )
 
    shape e.segment = Line {
       start: a
         end: b
-      strokeColor: rgba(0,0,0,.2)
+      strokeColor: Colors.lightGray
       strokeWidth: .75
       strokeDasharray: "2 1"
    }
 
-   scalar w = norm( a-b )
-   scalar h = (w/2.) / tan( e.alpha )
-   scalar R = sqrt( w*w/4. + h*h )
+   -- compute the arc radius r
+   scalar w = norm( a-b ) -- segment length
+   scalar h = (w/2.) / tan( e.alpha ) -- distance from segment midpoint to arc center
+   scalar r = sqrt( w*w/4. + h*h ) -- arc radius
 
+   -- compute the arc center c
    vec2 m = (a+b)/2.
    vec2 n = rot90(unit(b-a))
-   vec2 e.center = m + h*n
+   vec2 c = m + h*n
    
    shape e.arc = Path {
       fillColor: none()
       strokeColor: Colors.black
-      d: arc( "open", a, b, (R,R), 0., 0, 0 )
+      d: arc( "open", a, b, (r,r), 0., 0, 0 )
       strokeWidth: .75
       ensureOnCanvas: false
    }
+
+   layer e.arc above e.segment
+
+   -- associate some of this data with the edge
+   -- itself, so that it can be used in later rules
+   e.center = c
+   e.radius = r
+}
+
+forall Edge e1; Edge e2 {
+   layer e1.arc above e2.segment
+   layer e2.arc above e1.segment
 }
 
 -- Make sure the shape of each triangle is reasonably nice
@@ -125,5 +147,154 @@ where t := MakeTriangle(i,j,k) {
    ensure inRange( alpha, theta0, theta1 )
    ensure inRange( beta, theta0, theta1 )
 
+}
+
+-- Draw angles at corners of Euclidean triangles as arcs
+forall Angle A; Vertex i; Vertex j; Vertex k
+where A := EuclideanCorner(i,j,k) {
+   
+   -- get the vertex positions
+   vec2 pi = i.center
+   vec2 pj = j.center
+   vec2 pk = k.center
+
+   -- get unit vectors to neighbors
+   vec2 u = unit(pj-pi)
+   vec2 v = unit(pk-pi)
+
+   -- compute the angle at the corner
+   scalar θ = angleBetween( u, v )
+
+   -- compute the radius r needed to
+   -- achieve a target arc length s
+   scalar s = 15
+   scalar r = s/θ
+
+   -- arc start and end location
+   vec2 p = pi + r*u
+   vec2 q = pi + r*v
+
+   -- draw arc
+   shape e.arc = Path {
+      fillColor: none()
+      strokeColor: Colors.lightGray
+      d: arc( "open", p, q, (A.r,A.r), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+
+   -- associate some of this data with the angle
+   -- itself, so it can be accessed by later rules
+   A.r = r
+   A.u = u
+   A.v = v
+}
+
+-- draw labels for Euclidean corner angles
+forall Angle A; Vertex i; Vertex j; Vertex k
+where A has label; A := EuclideanCorner(i,j,k) {
+
+   scalar R = ?
+   ensure greaterThan( R, 0 )
+
+   scalar f = Global.labelSizeNum/2.
+   vec2 p = i.center
+   vec2 c = p + (f+A.r)*unit(A.u+A.v)
+   
+   a.labelText = Text {
+      center: c
+      string: A.label
+      fillColor: Colors.lightGray
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
+      ensureOnCanvas: false
+   }
+}
+
+-- draw an angle marker for each edge bending angle
+forall Angle A; Edge e; Vertex i; Vertex j
+where A := BendAngle(i,j); e := MakeEdge(i,j) {
+
+   -- edge endpoints
+   vec2 a = i.center
+   vec2 b = j.center
+
+   -- edge arc center and radius
+   vec2 c = e.center
+   scalar R = e.radius
+
+   -- unit vectors from arc center to edge endpoints
+   vec2 u = unit( a-c )
+   vec2 v = unit( b-c )
+   
+   -- a point some fixed fraction along the edge arc
+   vec2 p0 = c + R*unit( .75*u + .25*v )
+   vec2 p1 = c + R*unit( .25*u + .75*v )
+
+   -- the radius for the angle marker
+   scalar r = norm( p0-a )
+
+   -- the other endpoint of the angle marker is given by the
+   -- intersection of the arc's circle with the straight edge
+   vec2 q0 = a + r*unit(b-a)
+   vec2 q1 = b + r*unit(a-b)
+
+   -- draw arcs
+   shape A.arc0 = Path {
+      fillColor: none()
+      strokeColor: Colors.lightGray
+      d: arc( "open", p0, q0, (r,r), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+   shape A.arc1 = Path {
+      fillColor: none()
+      strokeColor: Colors.lightGray
+      d: arc( "open", q1, p1, (r,r), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+
+   -- associate some of this data with the angle
+   -- itself, so it can be accessed by later rules
+   A.p0 = p0
+   A.p1 = p1
+   A.q0 = q0
+   A.q1 = q1
+   A.r = r
+}
+
+-- draw an angle marker for each edge bending angle
+forall Angle A; Edge e; Vertex i; Vertex j
+where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
+
+   scalar f = Global.labelSizeNum/2.
+
+   vec2 w0 = unit( (A.p0+A.q0)/2. - i.center )
+   vec2 c0 = i.center + (f+A.r)*w0
+
+   vec2 w1 = unit( (A.p1+A.q1)/2. - j.center )
+   vec2 c1 = j.center + (f+A.r)*w1
+   
+   shape A.labelText0 = Text {
+      center: c0
+      string: A.label
+      fillColor: Colors.lightGray
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
+      ensureOnCanvas: false
+   }
+   
+   shape A.labelText1 = Text {
+      center: c1
+      string: A.label
+      fillColor: Colors.lightGray
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
+      ensureOnCanvas: false
+   }
 }
 
