@@ -1,0 +1,129 @@
+-- Set the target diagram size
+canvas {
+   width = 240
+   height = 180
+}
+
+-- A few colors used throughout
+Colors {
+   color black = rgba(0,0,0,1)
+   color white = rgba(1,1,1,1)
+}
+
+-- Define a global box around the canvas
+Global {
+   shape box = Rectangle {
+      center: (0,0)
+      width: canvas.width
+      height: canvas.height
+      strokeColor: rgba(0.,0.,0.,.05)
+      fillColor: none()
+      strokeWidth: 1
+   }
+}
+
+-- Draw each vertex as a little dot
+forall Vertex v {
+
+   vec2 v.center = (?,?)
+
+   shape v.dot = Circle {
+      fillColor: Colors.black
+      r: 1.75
+      center: v.center
+   }
+
+   ensure contains( Global.box, v.dot )
+}
+
+-- Draw text for labeled vertices
+forall Vertex v
+where v has label {
+
+   vec2 p = (?,?)
+
+   shape v.labelText = Text {
+      string: v.label
+      fillColor: Colors.black
+      fontFamily: "Linux Libertine O"
+      fontSize: "9px"
+      fontStyle: "italic"
+   }
+
+   shape v.strokeText = Text {
+      center: v.labelText.center
+      string: v.label
+      fillColor: Colors.white
+      strokeColor: Colors.white
+      strokeWidth: 2
+      fontFamily: "Linux Libertine O"
+      fontSize: "9px"
+      fontStyle: "italic"
+      ensureOnCanvas: false
+   }
+   layer v.labelText above v.strokeText
+
+   encourage near( v.labelText, v.dot )
+   ensure disjoint( v.labelText, v.dot, 2. )
+}
+
+-- Draw each edge as a circular arc, as well as
+-- a dashed line for the corresponding straight edge
+forall Edge e; Vertex i; Vertex j
+where e := MakeEdge(i,j) {
+
+   vec2 a = i.center
+   vec2 b = j.center
+
+   scalar e.alpha = ?
+   scalar alpha0 = toRadians( 10. )
+   scalar alpha1 = toRadians( 30. )
+   ensure inRange( e.alpha, alpha0, alpha1 )
+
+   shape e.segment = Line {
+      start: a
+        end: b
+      strokeColor: rgba(0,0,0,.2)
+      strokeWidth: .75
+      strokeDasharray: "2 1"
+   }
+
+   scalar w = norm( a-b )
+   scalar h = (w/2.) / tan( e.alpha )
+   scalar R = sqrt( w*w/4. + h*h )
+
+   vec2 m = (a+b)/2.
+   vec2 n = rot90(unit(b-a))
+   vec2 e.center = m + h*n
+   
+   shape e.arc = Path {
+      fillColor: none()
+      strokeColor: Colors.black
+      d: arc( "open", a, b, (R,R), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+}
+
+-- Make sure the shape of each triangle is reasonably nice
+forall Triangle t; Vertex i; Vertex j; Vertex k
+where t := MakeTriangle(i,j,k) {
+   
+   -- get the vertex positions
+   vec2 a = i.center
+   vec2 b = j.center
+   vec2 c = k.center
+
+   -- make sure the triangle is positively-oriented
+   ensure greaterThan( cross2D(b-a,c-a), 0. )
+
+   -- make sure the interior angles aren't too small/big
+   scalar theta0 = toRadians( 30 )
+   scalar theta1 = toRadians( 60 )
+   scalar alpha = angleBetween( b-a, c-a )
+   scalar  beta = angleBetween( c-b, a-b )
+   ensure inRange( alpha, theta0, theta1 )
+   ensure inRange( beta, theta0, theta1 )
+
+}
+

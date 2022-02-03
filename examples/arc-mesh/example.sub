@@ -1,0 +1,18 @@
+Vertex i, j, k, l, m
+
+Triangle ijk := MakeTriangle( i, j, k )
+Triangle jil := MakeTriangle( j, i, l )
+Triangle kjm := MakeTriangle( k, j, m )
+
+Edge ij := MakeEdge( i, j )
+Edge jk := MakeEdge( j, k )
+Edge ki := MakeEdge( k, i )
+Edge il := MakeEdge( i, l )
+Edge lj := MakeEdge( l, j )
+Edge jm := MakeEdge( j, m )
+Edge mk := MakeEdge( m, k )
+
+Corner c := MakeCorner( i, j, k )
+
+AutoLabel All
+
