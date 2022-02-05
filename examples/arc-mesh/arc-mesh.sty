@@ -298,3 +298,33 @@ where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
    }
 }
 
+forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
+where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
+
+   -- corner vertex positions
+   vec2 pi = i.center
+   vec2 pj = j.center
+   vec2 pk = k.center
+
+   -- edge arc data
+   vec2 cIJ = ij.center
+   vec2 cKI = ki.center
+   scalar rIJ = ij.radius
+   scalar rKI = ki.radius
+
+   -- start and end points for the corner arc
+   vec2 p = cIJ + rIJ*unit( .75*(pi-cIJ) + .25*(pj-cIJ) )
+   vec2 q = cKI + rKI*unit( .75*(pi-cKI) + .25*(pk-cKI) )
+
+   -- approximate radius for the corner arc
+   scalar A.r = ( norm(p-pi) + norm(q-pi) )/2.
+
+   shape angleMarker = Path {
+      fillColor: none()
+      strokeColor: Colors.lightGray
+      d: arc( "open", p, q, (A.r,A.r), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+}
+
