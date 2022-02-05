@@ -328,3 +328,27 @@ where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
    }
 }
 
+forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
+where A has label; A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
+
+   -- corner vertex positions
+   vec2 pi = i.center
+   vec2 pj = j.center
+   vec2 pk = k.center
+
+   -- angle bisector
+   vec2 w = unit( unit(pj-pi) + unit(pk-pi) )
+
+   scalar R = A.r + Global.labelSizeNum/2.
+
+   shape A.labelText = Text {
+      center: pi + R*w
+      string: A.label
+      fillColor: Colors.lightGray
+      fontFamily: Global.labelFont
+      fontSize: Global.labelSize
+      fontStyle: Global.labelStyle
+      ensureOnCanvas: false
+   }
+}
+
