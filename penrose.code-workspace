@@ -5,7 +5,8 @@
       "esbenp.prettier-vscode",
       "folke.vscode-monorepo-workspace",
       "karyfoundation.nearley",
-      "penrose.penrose-vs"
+      "penrose.penrose-vs",
+      "silvenon.mdx"
     ]
   },
   "folders": [
@@ -32,6 +33,10 @@
     {
       "name": "📦 @penrose/docs-site",
       "path": "packages/docs-site"
+    },
+    {
+      "name": "📦 @penrose/examples",
+      "path": "packages/examples"
     },
     {
       "name": "📦 @penrose/panels",
@@ -77,6 +82,9 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[markdown]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[mdx]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[scss]": {
