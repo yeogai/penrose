@@ -36,7 +36,7 @@ forall Vertex v {
 
    shape v.dot = Circle {
       fillColor: Colors.black
-      r: 1.75
+      r: 1.5
       center: v.center
    }
 
@@ -92,7 +92,7 @@ where e := MakeEdge(i,j) {
       start: a
         end: b
       strokeColor: Colors.lightGray
-      strokeWidth: .75
+      strokeWidth: .85
       strokeDasharray: "2 1"
    }
 
@@ -351,4 +351,50 @@ where A has label; A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdg
       ensureOnCanvas: false
    }
 }
+
+forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge jk; Edge ki
+where A := ExteriorAngle( i, j, k ); ij := MakeEdge(i,j); jk := MakeEdge(j,k); ki := MakeEdge(k,i) {
+   scalar markerSize = 16
+   scalar markerRadius = 14
+
+   -- draw a dashed line tangent to
+   -- the endpoint i of arc ki
+   vec2 c = ki.center
+   vec2 p = i.center
+   vec2 u = rot90(unit(c-p))
+   vec2 q = p - markerSize*u
+   shape A.markerLine = Line {
+      start: p
+        end: q
+      strokeColor: Colors.black
+      strokeWidth: .5
+      strokeDasharray: "1.5 1.5"
+      ensureOnCanvas: false
+   }
+
+   -- draw a circular arc from the
+   -- dashed line to the arc ij
+   vec2 x0 = p - markerRadius*u
+   vec2 x1 = circleCircleIntersection( ij.center, p, ij.radius, markerRadius )
+
+   shape A.angleMarker = Path {
+      fillColor: none()
+      strokeColor: Colors.black
+      d: arc( "open", x0, x1, (markerRadius,markerRadius), 0., 0, 0 )
+      strokeWidth: .5
+      --endArrowhead: true
+      --arrowheadSize: .75
+      ensureOnCanvas: false
+   }
+
+   shape A.angleMarkerFill = Path {
+      d: wedge( i.center, x0, x1, (markerRadius,markerRadius), 0., 0, 0 )
+      fillColor: Colors.lightGray
+      strokeColor: none()
+      ensureOnCanvas: false
+   }
+
+   layer A.angleMarker above A.angleMarkerFill
+}
+
 

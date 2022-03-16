@@ -1,2 +1,2 @@
-npx roger watch example.sub arc-mesh.sty arc-mesh.dsl
+npx roger watch figures/boundary-curvature.sub arc-mesh.sty arc-mesh.dsl
 

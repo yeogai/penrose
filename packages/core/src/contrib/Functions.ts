@@ -832,6 +832,45 @@ export const compDict = {
     };
   },
   /**
+   * Return one of the two intersections of two circles, with
+   * centers `a`,`b` and radii `r`,`R`, respectively.
+   * One intersection will be to the left of the oriented segment ab;
+   * the other will be to the right.  This routine returns the left
+   * intersection x; the right intersection can be obtained by
+   * reversing the order of circles in the argument list.
+   */
+  circleCircleIntersection: (
+    _context: Context,
+    a: VarAD[],
+    b: VarAD[],
+    r: VarAD,
+    R: VarAD
+  ): IVectorV<VarAD> => {
+     // l = |b-a|
+     const l = ops.vnorm( ops.vsub( b, a ) );
+     // theta = acos((r*r+l*l-R*R)/(2*r*l))
+     const theta = acos( div( sub(add(mul(r,r),mul(l,l)), mul(R,R)), mul(mul(constOf(2),r),l) ));
+     // u = (b-a)/l
+     const u = ops.vmul( div(constOf(1),l), ops.vsub(b,a) );
+
+     // v = rotateBy(u,-theta)
+     // XXX This function is implemented elsewhere... why can't I use it directly from here?
+     const t = neg(theta);
+     const [u1, u2] = u;
+     const v1 = add(mul(cos(t), u1), mul(sin(t), u2));
+     const v2 = add(neg(mul(sin(t), u1)), mul(cos(t), u2));
+     const v = [v1, v2];
+
+     // y = a + r*v
+     const y = ops.vadd( a, ops.vmul( r, v ));
+     // return y
+
+     return {
+        tag: "VectorV",
+        contents: toPt(y),
+     };
+  },
+  /**
    * Return a point located at the midpoint between pts `start` and `end`
    */
   midpoint: (
