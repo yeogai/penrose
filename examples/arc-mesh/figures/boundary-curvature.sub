@@ -1,7 +1,4 @@
--- Some nice variations:
---   SilvertonBoar45912
---   MojoCoyote540
---   InuitViper945
+-- variation: WindflowerStinkbug318
 
 Vertex i, j1, j2, j3, j4, j5
 
@@ -10,11 +7,11 @@ Triangle ij2j3 := MakeTriangle( i, j2, j3 )
 Triangle ij3j4 := MakeTriangle( i, j3, j4 )
 Triangle ij4j5 := MakeTriangle( i, j4, j5 )
 
-Edge ij1 := MakeEdge( i, j1 )
-Edge ij2 := MakeEdge( j2, i )
-Edge ij3 := MakeEdge( i, j3 )
-Edge ij4 := MakeEdge( j4, i )
-Edge ij5 := MakeEdge( i, j5 )
+Edge ij1 := MakeEdge( j1, i )
+Edge ij2 := MakeEdge( i, j2 )
+Edge ij3 := MakeEdge( j3, i )
+Edge ij4 := MakeEdge( i, j4 )
+Edge ij5 := MakeEdge( j5, i )
 Edge j1j2 := MakeEdge( j1, j2 )
 Edge j2j3 := MakeEdge( j2, j3 )
 Edge j3j4 := MakeEdge( j3, j4 )
@@ -27,14 +24,20 @@ Edge j4j5 := MakeEdge( j4, j5 )
 -- Angle betai34 := CATCorner( i, j3, j4 )
 -- Angle betai45 := CATCorner( i, j4, j5 )
 
-Angle bbar12i := ExteriorAngle( j1, j2, i )
+Angle beta1 := CATCorner( i, j4, j5 )
+Angle beta2 := CATCorner( j4, j5, i )
+Angle beta3 := CATCorner( j5, i, j4 )
+
+Angle bbar1 := ExteriorAngle( i, j4, j5 )
+Angle bbar2 := ExteriorAngle( j4, j5, i )
+Angle bbar3 := ExteriorAngle( j5, i, j4 )
 
 Label i "i"
 -- Label alpha "α"
 -- Label theta "θ"
-Label j1 "j₁"
-Label j2 "j₂"
+Label j5 "j₁"
+Label j4 "j₂"
 Label j3 "j₃"
-Label j4 "j₄"
-Label j5 "j₅"
+Label j2 "j₄"
+Label j1 "j₅"
 -- Label betai12 "β"

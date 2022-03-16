@@ -122,6 +122,11 @@ where e := MakeEdge(i,j) {
    e.radius = r
 }
 
+-- forall Vertex v; Edge e
+-- where v has label {
+--    ensure disjoint( v.strokeText, e.segment )
+-- }
+
 forall Edge e1; Edge e2 {
    layer e1.arc above e2.segment
    layer e2.arc above e1.segment
