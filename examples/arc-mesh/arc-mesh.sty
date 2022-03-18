@@ -303,8 +303,11 @@ where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
    }
 }
 
+-- angle marker for interior angle of CAT
 forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
 where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
+
+   scalar markerRadius = 14
 
    -- corner vertex positions
    vec2 pi = i.center
@@ -317,12 +320,16 @@ where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
    scalar rIJ = ij.radius
    scalar rKI = ki.radius
 
-   -- start and end points for the corner arc
-   vec2 p = cIJ + rIJ*unit( .75*(pi-cIJ) + .25*(pj-cIJ) )
-   vec2 q = cKI + rKI*unit( .75*(pi-cKI) + .25*(pk-cKI) )
 
    -- approximate radius for the corner arc
-   scalar A.r = ( norm(p-pi) + norm(q-pi) )/2.
+   -- scalar A.r = ( norm(p-pi) + norm(q-pi) )/2.
+   scalar A.r = markerRadius
+
+   -- start and end points for the corner arc
+   -- vec2 p = cIJ + rIJ*unit( .75*(pi-cIJ) + .25*(pj-cIJ) )
+   -- vec2 q = cKI + rKI*unit( .75*(pi-cKI) + .25*(pk-cKI) )
+   vec2 p = circleCircleIntersection( cIJ, pi, rIJ, A.r )
+   vec2 q = circleCircleIntersection( pi, cKI, A.r, rKI )
 
    shape angleMarker = Path {
       fillColor: none()
@@ -333,6 +340,7 @@ where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
    }
 }
 
+-- label for interior angle at corner of CAT
 forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
 where A has label; A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
 
@@ -344,7 +352,7 @@ where A has label; A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdg
    -- angle bisector
    vec2 w = unit( unit(pj-pi) + unit(pk-pi) )
 
-   scalar R = A.r + Global.labelSizeNum/2.
+   scalar R = A.r + Global.labelSizeNum*.75
 
    shape A.labelText = Text {
       center: pi + R*w

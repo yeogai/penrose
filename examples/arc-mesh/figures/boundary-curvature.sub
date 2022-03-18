@@ -17,20 +17,7 @@ Edge j2j3 := MakeEdge( j2, j3 )
 Edge j3j4 := MakeEdge( j3, j4 )
 Edge j4j5 := MakeEdge( j4, j5 )
 
---Angle theta := EuclideanCorner( i, j1, j2 )
---Angle alpha := BendAngle( i, j1 )
--- Angle betai12 := CATCorner( i, j1, j2 )
--- Angle betai23 := CATCorner( i, j2, j3 )
--- Angle betai34 := CATCorner( i, j3, j4 )
--- Angle betai45 := CATCorner( i, j4, j5 )
-
-Angle beta1 := CATCorner( i, j4, j5 )
-Angle beta2 := CATCorner( j4, j5, i )
-Angle beta3 := CATCorner( j5, i, j4 )
-
-Angle bbar1 := ExteriorAngle( i, j4, j5 )
-Angle bbar2 := ExteriorAngle( j4, j5, i )
-Angle bbar3 := ExteriorAngle( j5, i, j4 )
+Angle beta := CATCorner( i, j2, j3 )
 
 Label i "i"
 -- Label alpha "α"
@@ -40,4 +27,4 @@ Label j4 "j₂"
 Label j3 "j₃"
 Label j2 "j₄"
 Label j1 "j₅"
--- Label betai12 "β"
+Label beta "β"
