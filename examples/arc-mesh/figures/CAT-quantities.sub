@@ -1,0 +1,27 @@
+-- variation:
+
+Vertex i, j, k
+
+Triangle ijk := MakeTriangle( i, j, k )
+
+Edge ij := MakeEdge( i, j )
+Edge jk := MakeEdge( j, k )
+Edge ki := MakeEdge( k, i )
+
+Angle thetai := EuclideanCorner( i, j, k )
+Angle thetaj := EuclideanCorner( j, k, i )
+Angle thetak := EuclideanCorner( k, i, j )
+
+Circle Cij := CircleThrough( ij )
+--Circle Cjk := CircleThrough( jk )
+--Circle Cki := CircleThrough( ki )
+
+Segment rij := RadiusOf( Cij )
+--Segment rjk := RadiusOf( Cjk )
+--Segment rki := RadiusOf( Cki )
+
+AutoLabel All
+Label thetai "θᵢ"
+Label thetaj "θⱼ"
+Label thetak "θₖ"
+

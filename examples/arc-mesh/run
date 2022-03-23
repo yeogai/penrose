@@ -1,2 +1,2 @@
-npx roger watch figures/boundary-curvature.sub arc-mesh.sty arc-mesh.dsl
+npx roger watch figures/CAT-quantities.sub arc-mesh.sty arc-mesh.dsl
 

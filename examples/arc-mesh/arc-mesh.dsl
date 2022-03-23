@@ -3,6 +3,8 @@ type Edge
 type Triangle
 
 type Angle
+type Circle
+type Segment
 
 constructor MakeEdge( Vertex i, Vertex j ) -> Edge
 constructor MakeTriangle( Vertex i, Vertex j, Vertex k ) -> Triangle
@@ -11,4 +13,8 @@ constructor EuclideanCorner( Vertex i, Vertex j1, Vertex j2 ) -> Angle
 constructor CATCorner( Vertex i, Vertex j1, Vertex j2 ) -> Angle
 constructor BendAngle( Vertex i, Vertex j ) -> Angle
 constructor ExteriorAngle( Vertex i, Vertex j, Vertex k ) -> Angle
+
+constructor CircleThrough( Edge ij ) -> Circle
+
+constructor RadiusOf( Circle c ) -> Segment
 

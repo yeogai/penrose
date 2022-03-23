@@ -1,4 +1,4 @@
--- variation: WindflowerStinkbug318
+-- variation: AurichalcitePorcupine251
 
 Vertex i, j1, j2, j3, j4, j5
 
@@ -17,7 +17,10 @@ Edge j2j3 := MakeEdge( j2, j3 )
 Edge j3j4 := MakeEdge( j3, j4 )
 Edge j4j5 := MakeEdge( j4, j5 )
 
-Angle beta := CATCorner( i, j2, j3 )
+--Angle beta1 := CATCorner( i, j1, j2 )
+Angle beta2 := CATCorner( i, j2, j3 )
+--Angle beta3 := CATCorner( i, j3, j4 )
+Angle beta4 := CATCorner( i, j4, j5 )
 
 Label i "i"
 -- Label alpha "α"
@@ -27,4 +30,5 @@ Label j4 "j₂"
 Label j3 "j₃"
 Label j2 "j₄"
 Label j1 "j₅"
-Label beta "β"
+Label beta2 "β"
+Label beta4 "β"

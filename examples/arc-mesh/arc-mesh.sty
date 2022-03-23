@@ -8,6 +8,7 @@ canvas {
 Colors {
    color black = rgba(0,0,0,1)
    color white = rgba(1,1,1,1)
+   color clearGray = rgba(0,0,0,.2)
    color lightGray = rgba(.8,.8,.8,1.)
 }
 
@@ -27,6 +28,9 @@ Global {
    string labelStyle = "italic"
    string labelSize = "9px"
    scalar labelSizeNum = 9
+
+   -- default size for vertices, points, etc.
+   scalar dotSize = 1.5
 }
 
 -- Draw each vertex as a little dot
@@ -36,7 +40,7 @@ forall Vertex v {
 
    shape v.dot = Circle {
       fillColor: Colors.black
-      r: 1.5
+      r: Global.dotSize
       center: v.center
    }
 
@@ -55,20 +59,23 @@ where v has label {
       fontFamily: Global.labelFont
       fontSize: Global.labelSize
       fontStyle: Global.labelStyle
-   }
-
-   shape v.strokeText = Text {
-      center: v.labelText.center
-      string: v.label
-      fillColor: Colors.white
       strokeColor: Colors.white
       strokeWidth: 2
-      fontFamily: Global.labelFont
-      fontSize: Global.labelSize
-      fontStyle: Global.labelStyle
-      ensureOnCanvas: false
+      paintOrder: "stroke"
    }
-   layer v.labelText above v.strokeText
+
+   -- shape v.strokeText = Text {
+   --    center: v.labelText.center
+   --    string: v.label
+   --    fillColor: Colors.white
+   --    strokeColor: Colors.white
+   --    strokeWidth: 2
+   --    fontFamily: Global.labelFont
+   --    fontSize: Global.labelSize
+   --    fontStyle: Global.labelStyle
+   --    ensureOnCanvas: false
+   -- }
+   --layer v.labelText above v.strokeText
 
    encourage near( v.labelText, v.dot )
    ensure disjoint( v.labelText, v.dot, 2. )
@@ -91,7 +98,7 @@ where e := MakeEdge(i,j) {
    shape e.segment = Line {
       start: a
         end: b
-      strokeColor: Colors.lightGray
+      strokeColor: Colors.clearGray
       strokeWidth: .85
       strokeDasharray: "2 1"
    }
@@ -180,9 +187,9 @@ where A := EuclideanCorner(i,j,k) {
    vec2 q = pi + r*v
 
    -- draw arc
-   shape e.arc = Path {
+   shape A.angleMarker = Path {
       fillColor: none()
-      strokeColor: Colors.lightGray
+      strokeColor: Colors.clearGray
       d: arc( "open", p, q, (A.r,A.r), 0., 0, 0 )
       strokeWidth: .75
       ensureOnCanvas: false
@@ -206,10 +213,10 @@ where A has label; A := EuclideanCorner(i,j,k) {
    vec2 p = i.center
    vec2 c = p + (f+A.r)*unit(A.u+A.v)
    
-   a.labelText = Text {
+   A.labelText = Text {
       center: c
       string: A.label
-      fillColor: Colors.lightGray
+      fillColor: Colors.clearGray
       fontFamily: Global.labelFont
       fontSize: Global.labelSize
       fontStyle: Global.labelStyle
@@ -248,14 +255,14 @@ where A := BendAngle(i,j); e := MakeEdge(i,j) {
    -- draw arcs
    shape A.arc0 = Path {
       fillColor: none()
-      strokeColor: Colors.lightGray
+      strokeColor: Colors.clearGray
       d: arc( "open", p0, q0, (r,r), 0., 0, 0 )
       strokeWidth: .75
       ensureOnCanvas: false
    }
    shape A.arc1 = Path {
       fillColor: none()
-      strokeColor: Colors.lightGray
+      strokeColor: Colors.clearGray
       d: arc( "open", q1, p1, (r,r), 0., 0, 0 )
       strokeWidth: .75
       ensureOnCanvas: false
@@ -285,7 +292,7 @@ where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
    shape A.labelText0 = Text {
       center: c0
       string: A.label
-      fillColor: Colors.lightGray
+      fillColor: Colors.clearGray
       fontFamily: Global.labelFont
       fontSize: Global.labelSize
       fontStyle: Global.labelStyle
@@ -295,7 +302,7 @@ where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
    shape A.labelText1 = Text {
       center: c1
       string: A.label
-      fillColor: Colors.lightGray
+      fillColor: Colors.clearGray
       fontFamily: Global.labelFont
       fontSize: Global.labelSize
       fontStyle: Global.labelStyle
@@ -307,7 +314,7 @@ where A has label; A := BendAngle(i,j); e := MakeEdge(i,j) {
 forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
 where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
 
-   scalar markerRadius = 14
+   scalar markerArcLength = 20
 
    -- corner vertex positions
    vec2 pi = i.center
@@ -320,20 +327,64 @@ where A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdge(k,i) {
    scalar rIJ = ij.radius
    scalar rKI = ki.radius
 
+   -- Euclidean interior angle
+   scalar theta = angleBetween( pj-pi, pk-pi )
+   -- CAT interior angle
+   scalar beta = ij.alpha + ki.alpha + theta
 
-   -- approximate radius for the corner arc
-   -- scalar A.r = ( norm(p-pi) + norm(q-pi) )/2.
-   scalar A.r = markerRadius
+   -- pick a radius for the arc that gives
+   -- approximately the target arc length s
+   -- (assuming s = rβ)
+   scalar A.r = markerArcLength / beta
 
    -- start and end points for the corner arc
-   -- vec2 p = cIJ + rIJ*unit( .75*(pi-cIJ) + .25*(pj-cIJ) )
-   -- vec2 q = cKI + rKI*unit( .75*(pi-cKI) + .25*(pk-cKI) )
    vec2 p = circleCircleIntersection( cIJ, pi, rIJ, A.r )
    vec2 q = circleCircleIntersection( pi, cKI, A.r, rKI )
 
    shape angleMarker = Path {
       fillColor: none()
-      strokeColor: Colors.lightGray
+      strokeColor: Colors.clearGray
+      d: arc( "open", p, q, (A.r,A.r), 0., 0, 0 )
+      strokeWidth: .75
+      ensureOnCanvas: false
+   }
+}
+
+-- angle marker for interior angle of CAT
+-- XXX opposite orientation
+forall Angle A; Vertex i; Vertex j; Vertex k; Edge ij; Edge ki
+where A := CATCorner( i, j, k ); ij := MakeEdge(j,i); ki := MakeEdge(i,k) {
+
+   scalar markerArcLength = 20
+
+   -- corner vertex positions
+   vec2 pi = i.center
+   vec2 pj = j.center
+   vec2 pk = k.center
+
+   -- edge arc data
+   vec2 cIJ = ij.center
+   vec2 cKI = ki.center
+   scalar rIJ = ij.radius
+   scalar rKI = ki.radius
+
+   -- Euclidean interior angle
+   scalar theta = angleBetween( pj-pi, pk-pi )
+   -- CAT interior angle
+   scalar beta = ij.alpha + ki.alpha + theta
+
+   -- pick a radius for the arc that gives
+   -- approximately the target arc length s
+   -- (assuming s = rβ)
+   scalar A.r = markerArcLength / beta
+
+   -- start and end points for the corner arc
+   vec2 p = circleCircleIntersection( cIJ, pi, rIJ, A.r )
+   vec2 q = circleCircleIntersection( pi, cKI, A.r, rKI )
+
+   shape angleMarker = Path {
+      fillColor: none()
+      strokeColor: Colors.clearGray
       d: arc( "open", p, q, (A.r,A.r), 0., 0, 0 )
       strokeWidth: .75
       ensureOnCanvas: false
@@ -357,7 +408,7 @@ where A has label; A := CATCorner( i, j, k ); ij := MakeEdge(i,j); ki := MakeEdg
    shape A.labelText = Text {
       center: pi + R*w
       string: A.label
-      fillColor: Colors.lightGray
+      fillColor: Colors.clearGray
       fontFamily: Global.labelFont
       fontSize: Global.labelSize
       fontStyle: Global.labelStyle
@@ -402,12 +453,74 @@ where A := ExteriorAngle( i, j, k ); ij := MakeEdge(i,j); jk := MakeEdge(j,k); k
 
    shape A.angleMarkerFill = Path {
       d: wedge( i.center, x0, x1, (markerRadius,markerRadius), 0., 0, 0 )
-      fillColor: Colors.lightGray
+      fillColor: Colors.clearGray
       strokeColor: none()
       ensureOnCanvas: false
    }
 
    layer A.angleMarker above A.angleMarkerFill
+}
+
+forall Circle C {
+   vec2 C.center = (?,?)
+   scalar C.radius = ?
+}
+
+-- draw the radius
+forall Segment s; Circle C
+where s := RadiusOf( C ) {
+
+   -- optimize the direction of the radius
+   scalar s.theta = ?
+
+   -- unit vector in the direction of the radius
+   vec2 s.u = ( cos(s.theta), sin(s.theta) )
+   
+   s.icon = Line {
+      start: C.center
+      end: C.center + C.radius*s.u
+      strokeWidth: .75
+      strokeColor: Colors.lightGray
+      ensureOnCanvas: false
+   }
+
+   s.dot = Circle {
+      center: C.center
+      r: Global.dotSize
+      fillColor: Colors.lightGray
+      ensureOnCanvas: false
+   }
+}
+
+-- draw the circle associated with the arc through a given edge
+forall Circle C; Edge ij; Vertex i; Vertex j
+where C := CircleThrough( ij ); ij := MakeEdge( i, j ) {
+
+   -- copy the center and radius of the
+   -- edge's circular arc, so that it
+   -- can be more easily referenced by
+   -- rules that reference this circle
+   override C.center = ij.center
+   override C.radius = ij.radius
+
+   shape C.icon = Circle {
+      center: C.center
+      r: C.radius
+      ensureOnCanvas: false
+      fillColor: rgba( 0, 0, 0, .025 )
+      strokeColor: Colors.clearGray
+      strokeWidth: .75
+   }
+}
+
+-- for a circle through an edge arc, draw the radius so
+-- that it doesn't intersect the rest of the triangle
+forall Segment s; Circle C; Edge ij; Vertex i; Vertex j
+where s := RadiusOf(C); C := CircleThrough( ij ); ij := MakeEdge( i, j ) {
+
+   vec2 ui = unit(i.center - C.center)
+   vec2 uj = unit(j.center - C.center)
+   override s.u = -unit( ui + uj )
 }
 
 

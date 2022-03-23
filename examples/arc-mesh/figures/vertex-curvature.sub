@@ -1,0 +1,19 @@
+-- variation: WindflowerStinkbug318
+
+Vertex i, a0, a1, b0, b1, c0, c1
+
+Triangle ta := MakeTriangle( i, a0, a1 )
+Triangle tb := MakeTriangle( i, b0, b1 )
+Triangle tc := MakeTriangle( i, c0, c1 )
+
+Edge ia0 := MakeEdge( i, a0 )
+Edge ia1 := MakeEdge( i, a1 )
+Edge a01 := MakeEdge( a0, a1 )
+Edge ib0 := MakeEdge( i, b0 )
+Edge ib1 := MakeEdge( i, b1 )
+Edge b01 := MakeEdge( b0, b1 )
+Edge ic0 := MakeEdge( i, c0 )
+Edge ic1 := MakeEdge( i, c1 )
+Edge c01 := MakeEdge( c0, c1 )
+
+Label i "i"
